@@ -1,0 +1,51 @@
+units		lj
+atom_style	atomic
+variable    index equal 1
+variable    S equal 0.1
+variable    a equal 0
+log         log_${a}
+variable    T equal 0.1
+variable    time equal 0.00316228/(${T}^(1/2))
+variable    v equal ${T}^0.5
+variable    qwe equal 100*${time}
+variable    Rc equal 7.5
+
+
+
+dimension   2
+
+lattice     custom $S a1 1.0 0.0 0.0 a2 0.0 1.0 0.0 a3 0.0 0.0 1.0 &
+                    basis 0.0 0.0 0.0 basis 0.5 0.0 0.0
+region		box block -100 100 -0.5 0.5 -0.5 0.5
+
+
+create_box	1 box
+create_atoms 1 box
+
+
+mass		1 1.0
+
+velocity	all set 0 0 0
+
+pair_style	lj/cut ${Rc}
+pair_coeff	1 1 1.0 1.0 
+
+neighbor	0.3 bin
+neigh_modify	every 1 delay 0 check yes
+
+#fix		1 all nvt temp ${T} ${T} ${qwe}
+
+#fix 1 all phonon 2000 6000 2000 GAMMA LJ1D sysdim 1
+
+#fix 1 all lineforce 1.0 0.0 0.0
+
+fix 1 all move linear NULL 0 0
+
+dump 1 all custom 100 test1d.lammpstrj id x y vx vy fx fy
+
+
+
+timestep ${time}
+
+thermo		1000
+run		20000000
